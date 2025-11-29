@@ -14,6 +14,7 @@ class AsciiChat < Formula
 
   resource "bearssl" do
     url "https://www.bearssl.org/git/BearSSL",
+        using: :git,
         revision: "3d9be2f60b7764e46836514bcd6e453abdfa864a"
   end
 
@@ -35,33 +36,50 @@ class AsciiChat < Formula
   depends_on "cmake" => :build
   depends_on "ninja" => :build
   depends_on "llvm" => :build
-  depends_on "portaudio" => :build
-  depends_on "libsodium" => :build
-  depends_on "zstd" => :build
-  depends_on "mimalloc" => :build
+  depends_on "doxygen" => :build
+  depends_on "portaudio"
+  depends_on "libsodium"
+  depends_on "zstd"
 
   def install
+    # Stage submodule resources into deps/ directory
+    %w[tomlc17 bearssl libsodium-bcrypt-pbkdf uthash sokol].each do |dep|
+      resource(dep).stage(buildpath/"deps"/dep)
+    end
+
+    # Initialize a real git repo for version detection
+    # The cmake version system uses `git describe --tags` which needs a proper repo
+    system "git", "init"
+    system "git", "config", "user.email", "brew@localhost"
+    system "git", "config", "user.name", "Homebrew"
+    system "git", "add", "-A"
+    system "git", "commit", "-m", "Initial commit"
+    system "git", "tag", "v#{version}"
+
     # Use Clang from LLVM
     ENV["CC"] = Formula["llvm"].opt_bin/"clang"
     ENV["CXX"] = Formula["llvm"].opt_bin/"clang++"
 
-    # Choose preset based on platform
-    if OS.linux?
-      # Linux uses musl for static builds
-      system "cmake", "--preset", "release-musl", "-B", "build"
-    else
-      # macOS uses standard release preset
-      system "cmake", "--preset", "release", "-B", "build"
-    end
+    # Configure with cmake - use relwithdebinfo preset and disable mimalloc
+    # for simpler Homebrew builds (mimalloc causes linking issues with shared lib)
+    args = %W[
+      -G Ninja
+      -B build
+      -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_INSTALL_PREFIX=#{prefix}
+      -DUSE_MIMALLOC=OFF
+      -DUSE_CPACK=OFF
+    ]
+    system "cmake", *args
 
-    # Build documentation, libraries, and executables
-    system "cmake", "--build", "build", "--target", "docs"
+    # Build executable, libraries, and docs
+    system "cmake", "--build", "build", "--target", "ascii-chat"
     system "cmake", "--build", "build", "--target", "static-lib"
     system "cmake", "--build", "build", "--target", "shared-lib"
-    system "cmake", "--build", "build", "--target", "ascii-chat"
+    system "cmake", "--build", "build", "--target", "docs"
 
-    # Install to Homebrew prefix
-    system "cmake", "--install", "build", "--prefix", prefix
+    # Install using cmake
+    system "cmake", "--install", "build"
   end
 
   test do
