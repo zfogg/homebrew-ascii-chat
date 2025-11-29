@@ -42,32 +42,36 @@ class AsciiChat < Formula
   depends_on "zstd"
 
   def install
-    # Stage submodule resources into deps/ directory
-    %w[tomlc17 bearssl libsodium-bcrypt-pbkdf uthash sokol].each do |dep|
-      resource(dep).stage(buildpath/"deps"/dep)
-    end
+    if build.head?
+      # HEAD install: submodules are cloned by git, just init them
+      system "git", "submodule", "update", "--init", "--recursive"
+    else
+      # Tarball install: stage submodule resources into deps/ directory
+      %w[tomlc17 bearssl libsodium-bcrypt-pbkdf uthash sokol].each do |dep|
+        resource(dep).stage(buildpath/"deps"/dep)
+      end
 
-    # Initialize a real git repo for version detection
-    # The cmake version system uses `git describe --tags` which needs a proper repo
-    system "git", "init"
-    system "git", "config", "user.email", "brew@localhost"
-    system "git", "config", "user.name", "Homebrew"
-    system "git", "add", "-A"
-    system "git", "commit", "-m", "Initial commit"
-    system "git", "tag", "v#{version}"
+      # Initialize a git repo for version detection
+      # The cmake version system uses `git describe --tags` which needs a proper repo
+      system "git", "init"
+      system "git", "config", "user.email", "brew@localhost"
+      system "git", "config", "user.name", "Homebrew"
+      system "git", "add", "-A"
+      system "git", "commit", "-m", "Initial commit"
+      system "git", "tag", "v#{version}"
+    end
 
     # Use Clang from LLVM
     ENV["CC"] = Formula["llvm"].opt_bin/"clang"
     ENV["CXX"] = Formula["llvm"].opt_bin/"clang++"
 
-    # Configure with cmake - use relwithdebinfo preset and disable mimalloc
-    # for simpler Homebrew builds (mimalloc causes linking issues with shared lib)
+    # Configure with cmake
     args = %W[
       -G Ninja
       -B build
       -DCMAKE_BUILD_TYPE=Release
       -DCMAKE_INSTALL_PREFIX=#{prefix}
-      -DUSE_MIMALLOC=OFF
+      -DUSE_MIMALLOC=ON
       -DUSE_CPACK=OFF
     ]
     system "cmake", *args
