@@ -66,15 +66,7 @@ class AsciiChat < Formula
     ENV["CXX"] = Formula["llvm"].opt_bin/"clang++"
 
     # Configure with cmake
-    args = %W[
-      -G Ninja
-      -B build
-      -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_INSTALL_PREFIX=#{prefix}
-      -DUSE_MIMALLOC=ON
-      -DUSE_CPACK=OFF
-    ]
-    system "cmake", *args
+    system "cmake", "--preset", "release"
 
     # Build executable, libraries, and docs
     system "cmake", "--build", "build", "--target", "ascii-chat"
