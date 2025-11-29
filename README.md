@@ -1,4 +1,4 @@
-# Zfogg Ascii-chat
+# ascii-chat's Homebrew tap
 
 ## How do I install these formulae?
 
