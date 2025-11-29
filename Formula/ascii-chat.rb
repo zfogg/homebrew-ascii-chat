@@ -74,8 +74,8 @@ class AsciiChat < Formula
     system "cmake", "--build", "build", "--target", "shared-lib"
     system "cmake", "--build", "build", "--target", "docs"
 
-    # Install using cmake
-    system "cmake", "--install", "build"
+    # Install to Homebrew prefix
+    system "cmake", "--install", "build", "--prefix", prefix
   end
 
   test do
