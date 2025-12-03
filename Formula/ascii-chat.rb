@@ -1,8 +1,8 @@
 class AsciiChat < Formula
   desc "Video chat in your terminal"
   homepage "https://github.com/zfogg/ascii-chat"
-  url "https://github.com/zfogg/ascii-chat/releases/download/v0.3.14/ascii-chat-0.3.14-full.tar.gz"
-  sha256 "2625dce912125599ee6efbea5778ec8dfba67404ee370fb6aa11ecba983b07e7"
+  url "https://github.com/zfogg/ascii-chat/releases/download/v0.3.15/ascii-chat-0.3.15-full.tar.gz"
+  sha256 "71066ddf5fd19fb6727a3420ee452531eceae15a9c2662c9ee7cef5ff39b1ad2"
   license "MIT"
   head "https://github.com/zfogg/ascii-chat.git", branch: "master"
 
@@ -19,10 +19,13 @@ class AsciiChat < Formula
     if build.head?
       system "git", "submodule", "update", "--init", "--recursive"
     else
-      # Full tarball includes submodules, just set up git for version detection
-      mkdir_p ".git"
-      File.write(".git/HEAD", "ref: refs/tags/v#{version}")
-      FileUtils.touch(".git/index")
+      # Create a real git repo with the version tag so git describe works
+      system "git", "init", "-q"
+      system "git", "config", "user.email", "build@localhost"
+      system "git", "config", "user.name", "Build"
+      system "git", "add", "-A"
+      system "git", "commit", "-q", "-m", "v#{version}"
+      system "git", "tag", "v#{version}"
     end
 
     ENV["CC"] = Formula["llvm"].opt_bin/"clang"
@@ -30,7 +33,8 @@ class AsciiChat < Formula
 
     system "cmake", "-B", "build", "-S", ".", "-G", "Ninja",
            "-DCMAKE_BUILD_TYPE=Release",
-           "-DCMAKE_INSTALL_PREFIX=#{prefix}"
+           "-DCMAKE_INSTALL_PREFIX=#{prefix}",
+           "-DASCIICHAT_LLVM_CONFIG_EXECUTABLE=#{Formula["llvm"].opt_bin}/llvm-config"
 
     system "cmake", "--build", "build", "--target", "ascii-chat"
     system "cmake", "--build", "build", "--target", "shared-lib"
