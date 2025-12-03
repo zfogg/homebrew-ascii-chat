@@ -35,7 +35,8 @@ class AsciiChat < Formula
     system "cmake", "-B", "build", "-S", ".", "-G", "Ninja",
            "-DCMAKE_BUILD_TYPE=Release",
            "-DCMAKE_INSTALL_PREFIX=#{prefix}",
-           "-DASCIICHAT_LLVM_CONFIG_EXECUTABLE=#{Formula["llvm"].opt_bin}/llvm-config"
+           "-DASCIICHAT_LLVM_CONFIG_EXECUTABLE=#{Formula["llvm"].opt_bin}/llvm-config",
+           "-DASCIICHAT_LLD_EXECUTABLE=#{Formula["lld"].opt_bin}/ld.lld"
 
     system "cmake", "--build", "build", "--target", "ascii-chat"
     system "cmake", "--build", "build", "--target", "shared-lib"
