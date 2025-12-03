@@ -7,14 +7,14 @@ class AsciiChat < Formula
   head "https://github.com/zfogg/ascii-chat.git", branch: "master"
 
   depends_on "cmake" => :build
-  depends_on "ninja" => :build
-  depends_on "llvm" => :build
-  depends_on "lld" => :build
-  depends_on "mimalloc" => :build
-  depends_on "portaudio" => :build
-  depends_on "libsodium" => :build
-  depends_on "zstd" => :build
   depends_on "doxygen" => :build
+  depends_on "libsodium" => :build
+  depends_on "lld" => :build
+  depends_on "llvm" => :build
+  depends_on "mimalloc" => :build
+  depends_on "ninja" => :build
+  depends_on "portaudio" => :build
+  depends_on "zstd" => :build
 
   def install
     if build.head?
