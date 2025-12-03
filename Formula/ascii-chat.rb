@@ -1,8 +1,8 @@
 class AsciiChat < Formula
   desc "Video chat in your terminal"
   homepage "https://github.com/zfogg/ascii-chat"
-  url "https://github.com/zfogg/ascii-chat/releases/download/v0.3.12/ascii-chat-0.3.12-full.tar.gz"
-  sha256 "8fd96a4eb28d336491fb9121a7544f7f58190398cd67f6b04ed4a5e4ce1b6cb4"
+  url "https://github.com/zfogg/ascii-chat/releases/download/v0.3.14/ascii-chat-0.3.14-full.tar.gz"
+  sha256 "2625dce912125599ee6efbea5778ec8dfba67404ee370fb6aa11ecba983b07e7"
   license "MIT"
   head "https://github.com/zfogg/ascii-chat.git", branch: "master"
 
