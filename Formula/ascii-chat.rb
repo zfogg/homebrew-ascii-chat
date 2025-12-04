@@ -2,18 +2,18 @@ class AsciiChat < Formula
   desc "Video chat in your terminal"
   homepage "https://github.com/zfogg/ascii-chat"
   license "MIT"
-  version "0.3.29"
+  version "0.3.56"
 
   # Pre-built installer (default) - OS and architecture-specific
   on_macos do
     on_arm do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.sh"
-      sha256 "TODO_MACOS_ARM64"
+      sha256 "8a5aa8b9f737ca31aa3fcac79df1c896ebb7b0aacb0ceed3d3435f0ced32e16e"
     end
 
     on_intel do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-amd64.sh"
-      sha256 "TODO_MACOS_AMD64"
+      sha256 "800ffcf8189a175497d64ba495725ca71b5aac5c518acf20d4446f66fbead2d5"
     end
   end
 
@@ -25,7 +25,7 @@ class AsciiChat < Formula
 
     on_intel do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-amd64.sh"
-      sha256 "ab5784b22b94b8b91716c59028fb5ba9b369f750b81783d8d7d200f7bf488f7a"
+      sha256 "eaf678f2e4070f7d90c6a3208dce485b1e30f2a021bcea0301ae02782acbc38f"
     end
   end
 
