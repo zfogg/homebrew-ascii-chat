@@ -4,28 +4,28 @@ class AsciiChat < Formula
   license "MIT"
   version "0.3.56"
 
-  # Pre-built installer (default) - OS and architecture-specific
+  # Pre-built archive (default) - OS and architecture-specific
   on_macos do
     on_arm do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.sh"
-      sha256 "8a5aa8b9f737ca31aa3fcac79df1c896ebb7b0aacb0ceed3d3435f0ced32e16e"
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.tar.gz"
+      sha256 "638a1830c14f5aad706eedc818fabf5fc760604e7eb67d246ee9bf37e20cafdd"
     end
 
     on_intel do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-amd64.sh"
-      sha256 "800ffcf8189a175497d64ba495725ca71b5aac5c518acf20d4446f66fbead2d5"
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-amd64.tar.gz"
+      sha256 "b1d695ece8d4ccbf350b9985e80138be16e37ab4e8f86ff7f07e418b5377638b"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-arm64.sh"
-      sha256 "TODO_LINUX_ARM64"
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-arm64.tar.gz"
+      sha256 "a88619e54ad4c07cb78075fb7ee7651fd54a43f5d564735c213ddabff2b83570"
     end
 
     on_intel do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-amd64.sh"
-      sha256 "eaf678f2e4070f7d90c6a3208dce485b1e30f2a021bcea0301ae02782acbc38f"
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-amd64.tar.gz"
+      sha256 "594bd8b8c7219f92a7ddf3863437a7da390ff8b10b3c3d3e29d1217c9505b89b"
     end
   end
 
@@ -43,6 +43,7 @@ class AsciiChat < Formula
     depends_on "ninja" => :build
     depends_on "portaudio" => :build
     depends_on "zstd" => :build
+    depends_on "criterion" => :test
   end
 
   def install
@@ -66,10 +67,40 @@ class AsciiChat < Formula
 
       system "cmake", "--install", "build"
     else
-      # Install from pre-built .sh installer
-      installer = Dir["*.sh"].first
-      chmod 0755, installer
-      system "./#{installer}", "--prefix=#{prefix}", "--skip-license", "--exclude-subdir"
+      # Install from pre-built tar.gz archive
+      # Archive structure: ascii-chat-VERSION-OS-ARCH/{bin,include,lib,share}/
+      # Homebrew extracts the archive and if there's a single top-level directory,
+      # it automatically enters that directory. Check if we're already in it.
+      if Dir.exist?("bin")
+        # We're already in the right directory
+        bin.install Dir["bin/*"]
+        include.install Dir["include/*"] if Dir.exist?("include")
+        lib.install Dir["lib/*"] if Dir.exist?("lib")
+        # Install share/ which includes completions, docs, and man pages
+        share.install Dir["share/*"] if Dir.exist?("share")
+        # Explicitly install man pages for proper symlinks
+        man1.install Dir["share/man/man1/*"] if Dir.exist?("share/man/man1")
+        man3.install Dir["share/man/man3/*"] if Dir.exist?("share/man/man3")
+        # Install HTML docs
+        doc.install Dir["share/doc/ascii-chat/html"] if Dir.exist?("share/doc/ascii-chat/html")
+      else
+        # Need to enter the subdirectory
+        subdir = Dir["ascii-chat-*"].first
+        raise "Could not find ascii-chat directory in #{Dir.pwd}: #{Dir.glob('*')}" unless subdir
+
+        cd subdir do
+          bin.install Dir["bin/*"]
+          include.install Dir["include/*"] if Dir.exist?("include")
+          lib.install Dir["lib/*"] if Dir.exist?("lib")
+          # Install share/ which includes completions, docs, and man pages
+          share.install Dir["share/*"] if Dir.exist?("share")
+          # Explicitly install man pages for proper symlinks
+          man1.install Dir["share/man/man1/*"] if Dir.exist?("share/man/man1")
+          man3.install Dir["share/man/man3/*"] if Dir.exist?("share/man/man3")
+          # Install HTML docs
+          doc.install Dir["share/doc/ascii-chat/html"] if Dir.exist?("share/doc/ascii-chat/html")
+        end
+      end
     end
   end
 
