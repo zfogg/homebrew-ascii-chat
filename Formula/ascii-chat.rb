@@ -2,30 +2,30 @@ class AsciiChat < Formula
   desc "Video chat in your terminal"
   homepage "https://github.com/zfogg/ascii-chat"
   license "MIT"
-  version "0.4.10"
+  version "0.4.11"
 
   # Pre-built archive (default) - OS and architecture-specific
   on_macos do
     on_arm do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.tar.gz"
-      sha256 "fa6f663b96e9f66c6f93ebd2ae878428c7ff8dddfb604a4475d091ff81a624b2"
+      sha256 "325284c013a6f841bcca27942056b9b9bb639a447882fbe0fa752b3c44037c8e"
     end
 
     on_intel do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-amd64.tar.gz"
-      sha256 "fa5c704e934dd0915a7c676cab880a100f92986660ced6439c1c455182c24f5c"
+      sha256 "ea5e82cebe912c97c5cdfdee1cfcbba947593b35d03a23314af2ed66b4f5a8c9"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-arm64.tar.gz"
-      sha256 "7d922f3cc7ad37659a5d4da6c0edcc494c8a7740c782875cdfb776ba3c39167b"
+      sha256 "93834470fda9eb849efaa1db0ed60fd68fec377b097a169827445aa08834cc3e"
     end
 
     on_intel do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-amd64.tar.gz"
-      sha256 "1e7a75931a03578f869c6ae119e1da9390ffd467a4ab2dbfaa941523c55deee0"
+      sha256 "5260aa27cd076e38f9e966b64dbd3dc013ae635b28ad0c6d57c3502c7ec4847f"
     end
   end
 
