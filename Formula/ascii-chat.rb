@@ -8,7 +8,7 @@ class AsciiChat < Formula
   on_macos do
     on_arm do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.tar.gz"
-      sha256 "a5bc1e03eb99cdd9abd8656948a806d74f1e39590f30cddd81218ebe75f19f38"
+      sha256 "fa6f663b96e9f66c6f93ebd2ae878428c7ff8dddfb604a4475d091ff81a624b2"
     end
 
     on_intel do
