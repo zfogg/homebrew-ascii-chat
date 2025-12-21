@@ -1,8 +1,8 @@
 class AsciiChat < Formula
   desc "Video chat in your terminal"
   homepage "https://github.com/zfogg/ascii-chat"
-  license "MIT"
   version "0.4.11"
+  license "MIT"
 
   # Pre-built archive (default) - OS and architecture-specific
   on_macos do
@@ -30,10 +30,8 @@ class AsciiChat < Formula
   end
 
   # Build from source with --HEAD
-  head "https://github.com/zfogg/ascii-chat.git", branch: "master"
-
   # Build dependencies only needed for --HEAD
-  head do
+  head "https://github.com/zfogg/ascii-chat.git", branch: "master" do
     depends_on "cmake" => :build
     depends_on "doxygen" => :build
     depends_on "libsodium" => :build
@@ -70,9 +68,14 @@ class AsciiChat < Formula
       # Install from pre-built tar.gz archive
       # Archive structure: ascii-chat-VERSION-OS-ARCH/{bin,include,lib,share}/
       # Homebrew extracts the archive and if there's a single top-level directory,
-      # it automatically enters that directory. Check if we're already in it.
-      if Dir.exist?("bin")
-        # We're already in the right directory
+      # it automatically enters that directory. Determine the working directory.
+      working_dir = if Dir.exist?("bin")
+                      "."
+                    else
+                      Dir["ascii-chat-*"].first || raise("Could not find ascii-chat directory in #{Dir.pwd}: #{Dir.glob("*")}")
+                    end
+
+      cd working_dir do
         bin.install Dir["bin/*"]
         include.install Dir["include/*"] if Dir.exist?("include")
         lib.install Dir["lib/*"] if Dir.exist?("lib")
@@ -82,24 +85,7 @@ class AsciiChat < Formula
         man1.install Dir["share/man/man1/*"] if Dir.exist?("share/man/man1")
         man3.install Dir["share/man/man3/*"] if Dir.exist?("share/man/man3")
         # Install HTML docs
-        doc.install Dir["share/doc/ascii-chat/html"] if Dir.exist?("share/doc/ascii-chat/html")
-      else
-        # Need to enter the subdirectory
-        subdir = Dir["ascii-chat-*"].first
-        raise "Could not find ascii-chat directory in #{Dir.pwd}: #{Dir.glob('*')}" unless subdir
-
-        cd subdir do
-          bin.install Dir["bin/*"]
-          include.install Dir["include/*"] if Dir.exist?("include")
-          lib.install Dir["lib/*"] if Dir.exist?("lib")
-          # Install share/ which includes completions, docs, and man pages
-          share.install Dir["share/*"] if Dir.exist?("share")
-          # Explicitly install man pages for proper symlinks
-          man1.install Dir["share/man/man1/*"] if Dir.exist?("share/man/man1")
-          man3.install Dir["share/man/man3/*"] if Dir.exist?("share/man/man3")
-          # Install HTML docs
-          doc.install Dir["share/doc/ascii-chat/html"] if Dir.exist?("share/doc/ascii-chat/html")
-        end
+        doc.install "share/doc/ascii-chat/html" if Dir.exist?("share/doc/ascii-chat/html")
       end
     end
   end
