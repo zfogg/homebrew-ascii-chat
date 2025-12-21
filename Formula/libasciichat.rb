@@ -1,5 +1,5 @@
-class AsciiChat < Formula
-  desc "Video chat in your terminal"
+class Libasciichat < Formula
+  desc "Development libraries and documentation for ascii-chat"
   homepage "https://github.com/zfogg/ascii-chat"
   version "0.4.11"
   license "MIT"
@@ -14,7 +14,6 @@ class AsciiChat < Formula
     depends_on "ninja" => :build
     depends_on "portaudio" => :build
     depends_on "zstd" => :build
-    depends_on "criterion" => :test
   end
 
   on_macos do
@@ -54,31 +53,33 @@ class AsciiChat < Formula
              "-DASCIICHAT_LLVM_CONFIG_EXECUTABLE=#{Formula["llvm"].opt_bin}/llvm-config",
              "-DASCIICHAT_LLD_EXECUTABLE=#{Formula["lld"].opt_bin}/ld.lld"
 
-      system "cmake", "--build", "build", "--target", "ascii-chat"
+      system "cmake", "--build", "build", "--target", "shared-lib"
+      system "cmake", "--build", "build", "--target", "static-lib"
       system "cmake", "--build", "build", "--target", "docs"
 
-      bin.install "build/bin/ascii-chat"
-      man1.install Dir["build/docs/man/man1/*"]
-
-      (prefix/"build").install Dir["build/*"]
+      system "cmake", "--install", "build"
     else
       working_dir = Dir.exist?("bin") ? "." : Dir["ascii-chat-*"].first
       raise "Could not find ascii-chat directory" unless working_dir
 
       cd working_dir do
-        bin.install Dir["bin/*"]
-        man1.install Dir["share/man/man1/*"]
+        include.install Dir["include/*"]
+        lib.install Dir["lib/*"]
+        man3.install Dir["share/man/man3/*"]
+        doc.install "share/doc/ascii-chat/html"
       end
     end
   end
 
   test do
-    if (prefix/"build").exist?
-      cd prefix/"build" do
-        system "ctest", "--output-on-failure", "--verbose"
-      end
-    else
-      assert_match "ascii-chat", shell_output("#{bin}/ascii-chat --help 2>&1", 1)
-    end
+    (testpath/"test.c").write <<~EOS
+      #include <asciichat/log.h>
+      int main() {
+        log_info("libasciichat test");
+        return 0;
+      }
+    EOS
+    system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lasciichat", "-o", "test"
+    assert_match "libasciichat test", shell_output("./test 2>&1")
   end
 end
