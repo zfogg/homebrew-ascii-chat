@@ -4,8 +4,6 @@ class AsciiChat < Formula
   version "0.4.11"
   license "MIT"
 
-  # Build from source with --HEAD
-  # Build dependencies only needed for --HEAD
   head "https://github.com/zfogg/ascii-chat.git", branch: "master" do
     depends_on "cmake" => :build
     depends_on "doxygen" => :build
@@ -19,7 +17,6 @@ class AsciiChat < Formula
     depends_on "criterion" => :test
   end
 
-  # Pre-built archive (default) - OS and architecture-specific
   on_macos do
     on_arm do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.tar.gz"
@@ -46,7 +43,6 @@ class AsciiChat < Formula
 
   def install
     if build.head?
-      # Build from source
       system "git", "submodule", "update", "--init", "--recursive"
 
       ENV["CC"] = Formula["llvm"].opt_bin/"clang"
@@ -62,32 +58,36 @@ class AsciiChat < Formula
       system "cmake", "--build", "build", "--target", "shared-lib"
       system "cmake", "--build", "build", "--target", "static-lib"
       system "cmake", "--build", "build", "--target", "docs"
+      system "cmake", "--build", "build", "--target", "all"
 
       system "cmake", "--install", "build"
+
+      (prefix/"build").install Dir["build/*"]
     else
-      # Install from pre-built tar.gz archive
-      # Archive structure: ascii-chat-VERSION-OS-ARCH/{bin,include,lib,share}/
-      # Homebrew extracts the archive and if there's a single top-level directory,
-      # it automatically enters that directory. Determine the working directory.
       working_dir = Dir.exist?("bin") ? "." : Dir["ascii-chat-*"].first
       raise "Could not find ascii-chat directory" unless working_dir
 
       cd working_dir do
         bin.install Dir["bin/*"]
-        include.install Dir["include/*"] if Dir.exist?("include")
-        lib.install Dir["lib/*"] if Dir.exist?("lib")
-        # Install share/ which includes completions, docs, and man pages
-        share.install Dir["share/*"] if Dir.exist?("share")
-        # Explicitly install man pages for proper symlinks
-        man1.install Dir["share/man/man1/*"] if Dir.exist?("share/man/man1")
-        man3.install Dir["share/man/man3/*"] if Dir.exist?("share/man/man3")
-        # Install HTML docs
-        doc.install "share/doc/ascii-chat/html" if Dir.exist?("share/doc/ascii-chat/html")
+        include.install Dir["include/*"]
+        lib.install Dir["lib/*"]
+        share.install Dir["share/*"]
+        man1.install Dir["share/man/man1/*"]
+        man3.install Dir["share/man/man3/*"]
+        doc.install "share/doc/ascii-chat/html"
       end
     end
   end
 
   test do
+    if (prefix/"build").exist?
+      cd prefix/"build" do
+        system "ctest", "--output-on-failure", "--verbose"
+      end
+    else
+      raise "Could not find build directory"
+    end
+
     assert_match "ascii-chat", shell_output("#{bin}/ascii-chat --help 2>&1", 1)
   end
 end
