@@ -70,9 +70,7 @@ class AsciiChat < Formula
       # Homebrew extracts the archive and if there's a single top-level directory,
       # it automatically enters that directory. Determine the working directory.
       working_dir = Dir.exist?("bin") ? "." : Dir["ascii-chat-*"].first
-      unless working_dir
-        raise "Could not find ascii-chat directory in #{Dir.pwd}: #{Dir.glob("*")}"
-      end
+      raise "Could not find ascii-chat directory" unless working_dir
 
       cd working_dir do
         bin.install Dir["bin/*"]
