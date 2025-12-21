@@ -1,7 +1,7 @@
 class Libasciichat < Formula
   desc "Development libraries and documentation for ascii-chat"
   homepage "https://github.com/zfogg/ascii-chat"
-  version "0.4.11"
+  version "0.4.12"
   license "MIT"
 
   head "https://github.com/zfogg/ascii-chat.git", branch: "master" do
@@ -18,25 +18,25 @@ class Libasciichat < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.tar.gz"
-      sha256 "325284c013a6f841bcca27942056b9b9bb639a447882fbe0fa752b3c44037c8e"
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-macOS-arm64.tar.gz"
+      sha256 "0a507bacd9439757eb4e5163859b9aa0e30b3859ee7fd86c2083ddebdb42339c"
     end
 
     on_intel do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-amd64.tar.gz"
-      sha256 "ea5e82cebe912c97c5cdfdee1cfcbba947593b35d03a23314af2ed66b4f5a8c9"
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-macOS-amd64.tar.gz"
+      sha256 "7c74d2cd5db934b8ef672443a7b0864f54eb09371f6efdf7941657648110231d"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-arm64.tar.gz"
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-Linux-arm64.tar.gz"
       sha256 "93834470fda9eb849efaa1db0ed60fd68fec377b097a169827445aa08834cc3e"
     end
 
     on_intel do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-amd64.tar.gz"
-      sha256 "5260aa27cd076e38f9e966b64dbd3dc013ae635b28ad0c6d57c3502c7ec4847f"
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-Linux-amd64.tar.gz"
+      sha256 "346bc0e1a9328ffb16d53e04f1157452e1f809dd83c78eb27ce3d002f3cfe628"
     end
   end
 
@@ -59,15 +59,11 @@ class Libasciichat < Formula
 
       system "cmake", "--install", "build"
     else
-      working_dir = Dir.exist?("bin") ? "." : Dir["ascii-chat-*"].first
-      raise "Could not find ascii-chat directory" unless working_dir
-
-      cd working_dir do
-        include.install Dir["include/*"]
-        lib.install Dir["lib/*"]
-        man3.install Dir["share/man/man3/*"]
-        doc.install "share/doc/ascii-chat/html"
-      end
+      # Package extracts directly with include/, lib/, etc. at the root
+      include.install Dir["include/*"]
+      lib.install Dir["lib/*"]
+      man3.install Dir["share/man/man3/*"]
+      doc.install "share/doc/ascii-chat/html"
     end
   end
 
