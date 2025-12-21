@@ -4,6 +4,21 @@ class AsciiChat < Formula
   version "0.4.11"
   license "MIT"
 
+  # Build from source with --HEAD
+  # Build dependencies only needed for --HEAD
+  head "https://github.com/zfogg/ascii-chat.git", branch: "master" do
+    depends_on "cmake" => :build
+    depends_on "doxygen" => :build
+    depends_on "libsodium" => :build
+    depends_on "lld" => :build
+    depends_on "llvm" => :build
+    depends_on "mimalloc" => :build
+    depends_on "ninja" => :build
+    depends_on "portaudio" => :build
+    depends_on "zstd" => :build
+    depends_on "criterion" => :test
+  end
+
   # Pre-built archive (default) - OS and architecture-specific
   on_macos do
     on_arm do
@@ -27,21 +42,6 @@ class AsciiChat < Formula
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-amd64.tar.gz"
       sha256 "5260aa27cd076e38f9e966b64dbd3dc013ae635b28ad0c6d57c3502c7ec4847f"
     end
-  end
-
-  # Build from source with --HEAD
-  # Build dependencies only needed for --HEAD
-  head "https://github.com/zfogg/ascii-chat.git", branch: "master" do
-    depends_on "cmake" => :build
-    depends_on "doxygen" => :build
-    depends_on "libsodium" => :build
-    depends_on "lld" => :build
-    depends_on "llvm" => :build
-    depends_on "mimalloc" => :build
-    depends_on "ninja" => :build
-    depends_on "portaudio" => :build
-    depends_on "zstd" => :build
-    depends_on "criterion" => :test
   end
 
   def install
@@ -69,11 +69,10 @@ class AsciiChat < Formula
       # Archive structure: ascii-chat-VERSION-OS-ARCH/{bin,include,lib,share}/
       # Homebrew extracts the archive and if there's a single top-level directory,
       # it automatically enters that directory. Determine the working directory.
-      working_dir = if Dir.exist?("bin")
-                      "."
-                    else
-                      Dir["ascii-chat-*"].first || raise("Could not find ascii-chat directory in #{Dir.pwd}: #{Dir.glob("*")}")
-                    end
+      working_dir = Dir.exist?("bin") ? "." : Dir["ascii-chat-*"].first
+      unless working_dir
+        raise "Could not find ascii-chat directory in #{Dir.pwd}: #{Dir.glob("*")}"
+      end
 
       cd working_dir do
         bin.install Dir["bin/*"]
