@@ -59,6 +59,9 @@ class AsciiChat < Formula
 
       bin.install "build/bin/ascii-chat"
       man1.install Dir["build/docs/man/man1/*"]
+      bash_completion.install "share/completions/ascii-chat.bash" => "ascii-chat"
+      zsh_completion.install "share/completions/_ascii-chat"
+      fish_completion.install "share/completions/ascii-chat.fish"
 
       (prefix/"build").install Dir["build/*"]
     else
@@ -68,6 +71,9 @@ class AsciiChat < Formula
       cd working_dir do
         bin.install Dir["bin/*"]
         man1.install Dir["share/man/man1/*"]
+        bash_completion.install "share/bash-completion/completions/ascii-chat"
+        zsh_completion.install "share/zsh/site-functions/_ascii-chat"
+        fish_completion.install "share/fish/vendor_completions.d/ascii-chat.fish"
       end
     end
   end
