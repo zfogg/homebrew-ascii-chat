@@ -19,27 +19,29 @@ class AsciiChat < Formula
     depends_on "criterion" => :test
   end
 
-  on_macos do
-    on_arm do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.tar.gz"
-      sha256 "8585d5902c4d0131c719b566ffb6a14594ebbadbe42eea148c27920f515d9503"
+  unless build.head?
+    on_macos do
+      on_arm do
+        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.tar.gz"
+        sha256 "8585d5902c4d0131c719b566ffb6a14594ebbadbe42eea148c27920f515d9503"
+      end
+
+      on_intel do
+        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-amd64.tar.gz"
+        sha256 "f0ec8f5e75062ad730255f2880dce2056e7e0bbe41669efb604c421b7b22279d"
+      end
     end
 
-    on_intel do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-amd64.tar.gz"
-      sha256 "f0ec8f5e75062ad730255f2880dce2056e7e0bbe41669efb604c421b7b22279d"
-    end
-  end
+    on_linux do
+      on_arm do
+        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-arm64.tar.gz"
+        sha256 "93834470fda9eb849efaa1db0ed60fd68fec377b097a169827445aa08834cc3e"
+      end
 
-  on_linux do
-    on_arm do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-arm64.tar.gz"
-      sha256 "93834470fda9eb849efaa1db0ed60fd68fec377b097a169827445aa08834cc3e"
-    end
-
-    on_intel do
-      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-amd64.tar.gz"
-      sha256 "7c262c787b7b5ab5dee26d167ff594ff071df6308e2609b0d46751c22ce1d247"
+      on_intel do
+        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-amd64.tar.gz"
+        sha256 "7c262c787b7b5ab5dee26d167ff594ff071df6308e2609b0d46751c22ce1d247"
+      end
     end
   end
 
