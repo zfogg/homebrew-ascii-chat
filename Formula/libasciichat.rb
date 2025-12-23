@@ -4,44 +4,42 @@ class Libasciichat < Formula
   version "0.4.12"
   license "MIT"
 
-  head "https://github.com/zfogg/ascii-chat.git", branch: "master" do
-    depends_on "cmake" => :build
-    depends_on "doxygen" => :build
-    depends_on "libsodium" => :build
-    depends_on "lld" => :build
-    depends_on "llvm" => :build
-    depends_on "mimalloc" => :build
-    depends_on "ninja" => :build
-    depends_on "opus" => :build
-    depends_on "portaudio" => :build
-    depends_on "speexdsp" => :build
-    depends_on "zstd" => :build
-    depends_on "criterion" => :test
-  end
+  head "https://github.com/zfogg/ascii-chat.git", branch: "master"
 
-  unless build.head?
-    on_macos do
-      on_arm do
-        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-macOS-arm64.tar.gz"
-        sha256 "0a507bacd9439757eb4e5163859b9aa0e30b3859ee7fd86c2083ddebdb42339c"
-      end
+  depends_on "cmake" => :build
+  depends_on "doxygen" => :build
+  depends_on "libsodium" => :build
+  depends_on "lld" => :build
+  depends_on "llvm" => :build
+  depends_on "mimalloc" => :build
+  depends_on "ninja" => :build
+  depends_on "opus" => :build
+  depends_on "portaudio" => :build
+  depends_on "speexdsp" => :build
+  depends_on "zstd" => :build
+  depends_on "criterion" => :test
 
-      on_intel do
-        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-macOS-amd64.tar.gz"
-        sha256 "7c74d2cd5db934b8ef672443a7b0864f54eb09371f6efdf7941657648110231d"
-      end
+  on_macos do
+    on_arm do
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-macOS-arm64.tar.gz"
+      sha256 "0a507bacd9439757eb4e5163859b9aa0e30b3859ee7fd86c2083ddebdb42339c"
     end
 
-    on_linux do
-      on_arm do
-        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-Linux-arm64.tar.gz"
-        sha256 "93834470fda9eb849efaa1db0ed60fd68fec377b097a169827445aa08834cc3e"
-      end
+    on_intel do
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-macOS-amd64.tar.gz"
+      sha256 "7c74d2cd5db934b8ef672443a7b0864f54eb09371f6efdf7941657648110231d"
+    end
+  end
 
-      on_intel do
-        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-Linux-amd64.tar.gz"
-        sha256 "346bc0e1a9328ffb16d53e04f1157452e1f809dd83c78eb27ce3d002f3cfe628"
-      end
+  on_linux do
+    on_arm do
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-Linux-arm64.tar.gz"
+      sha256 "93834470fda9eb849efaa1db0ed60fd68fec377b097a169827445aa08834cc3e"
+    end
+
+    on_intel do
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-Linux-amd64.tar.gz"
+      sha256 "346bc0e1a9328ffb16d53e04f1157452e1f809dd83c78eb27ce3d002f3cfe628"
     end
   end
 

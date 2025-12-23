@@ -4,44 +4,41 @@ class AsciiChat < Formula
   version "0.4.12"
   license "MIT"
 
-  head "https://github.com/zfogg/ascii-chat.git", branch: "master" do
-    depends_on "cmake" => :build
-    depends_on "doxygen" => :build
-    depends_on "libsodium" => :build
-    depends_on "lld" => :build
-    depends_on "llvm" => :build
-    depends_on "mimalloc" => :build
-    depends_on "ninja" => :build
-    depends_on "opus" => :build
-    depends_on "portaudio" => :build
-    depends_on "speexdsp" => :build
-    depends_on "zstd" => :build
-    depends_on "criterion" => :test
-  end
+  head "https://github.com/zfogg/ascii-chat.git", branch: "master"
 
-  unless build.head?
-    on_macos do
-      on_arm do
-        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.tar.gz"
-        sha256 "8585d5902c4d0131c719b566ffb6a14594ebbadbe42eea148c27920f515d9503"
-      end
+  depends_on "cmake" => :build
+  depends_on "libsodium" => :build
+  depends_on "lld" => :build
+  depends_on "llvm" => :build
+  depends_on "mimalloc" => :build
+  depends_on "ninja" => :build
+  depends_on "opus" => :build
+  depends_on "portaudio" => :build
+  depends_on "speexdsp" => :build
+  depends_on "zstd" => :build
+  depends_on "criterion" => :test
 
-      on_intel do
-        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-amd64.tar.gz"
-        sha256 "f0ec8f5e75062ad730255f2880dce2056e7e0bbe41669efb604c421b7b22279d"
-      end
+  on_macos do
+    on_arm do
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.tar.gz"
+      sha256 "8585d5902c4d0131c719b566ffb6a14594ebbadbe42eea148c27920f515d9503"
     end
 
-    on_linux do
-      on_arm do
-        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-arm64.tar.gz"
-        sha256 "93834470fda9eb849efaa1db0ed60fd68fec377b097a169827445aa08834cc3e"
-      end
+    on_intel do
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-amd64.tar.gz"
+      sha256 "f0ec8f5e75062ad730255f2880dce2056e7e0bbe41669efb604c421b7b22279d"
+    end
+  end
 
-      on_intel do
-        url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-amd64.tar.gz"
-        sha256 "7c262c787b7b5ab5dee26d167ff594ff071df6308e2609b0d46751c22ce1d247"
-      end
+  on_linux do
+    on_arm do
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-arm64.tar.gz"
+      sha256 "93834470fda9eb849efaa1db0ed60fd68fec377b097a169827445aa08834cc3e"
+    end
+
+    on_intel do
+      url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-amd64.tar.gz"
+      sha256 "7c262c787b7b5ab5dee26d167ff594ff071df6308e2609b0d46751c22ce1d247"
     end
   end
 
@@ -68,10 +65,10 @@ class AsciiChat < Formula
              "-DASCIICHAT_LLD_EXECUTABLE=#{Formula["lld"].opt_bin}/ld.lld"
 
       system "cmake", "--build", "build", "--target", "ascii-chat"
-      system "cmake", "--build", "build", "--target", "docs"
+      system "cmake", "--build", "build", "--target", "man1"
 
       bin.install "build/bin/ascii-chat"
-      man1.install Dir["build/docs/man/man1/*"]
+      man1.install "build/docs/ascii-chat.1"
       bash_completion.install "share/completions/ascii-chat.bash" => "ascii-chat"
       zsh_completion.install "share/completions/_ascii-chat"
       fish_completion.install "share/completions/ascii-chat.fish"
