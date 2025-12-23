@@ -14,6 +14,9 @@ class Libasciichat < Formula
     depends_on "ninja" => :build
     depends_on "portaudio" => :build
     depends_on "zstd" => :build
+    depends_on "opus" => :build
+    depends_on "speexdsp" => :build
+    depends_on "criterion" => :test
   end
 
   on_macos do
@@ -47,10 +50,19 @@ class Libasciichat < Formula
       ENV["CC"] = Formula["llvm"].opt_bin/"clang"
       ENV["CXX"] = Formula["llvm"].opt_bin/"clang++"
 
+      llvm_bin = Formula["llvm"].opt_bin
       system "cmake", "-B", "build", "-S", ".", "-G", "Ninja",
              "-DCMAKE_BUILD_TYPE=Release",
              "-DCMAKE_INSTALL_PREFIX=#{prefix}",
-             "-DASCIICHAT_LLVM_CONFIG_EXECUTABLE=#{Formula["llvm"].opt_bin}/llvm-config",
+             "-DASCIICHAT_LLVM_CONFIG_EXECUTABLE=#{llvm_bin}/llvm-config",
+             "-DASCIICHAT_CLANG_EXECUTABLE=#{llvm_bin}/clang",
+             "-DASCIICHAT_CLANG_PLUS_PLUS_EXECUTABLE=#{llvm_bin}/clang++",
+             "-DASCIICHAT_LLVM_AR_EXECUTABLE=#{llvm_bin}/llvm-ar",
+             "-DASCIICHAT_LLVM_RANLIB_EXECUTABLE=#{llvm_bin}/llvm-ranlib",
+             "-DASCIICHAT_LLVM_NM_EXECUTABLE=#{llvm_bin}/llvm-nm",
+             "-DASCIICHAT_LLVM_READELF_EXECUTABLE=#{llvm_bin}/llvm-readelf",
+             "-DASCIICHAT_LLVM_OBJDUMP_EXECUTABLE=#{llvm_bin}/llvm-objdump",
+             "-DASCIICHAT_LLVM_STRIP_EXECUTABLE=#{llvm_bin}/llvm-strip",
              "-DASCIICHAT_LLD_EXECUTABLE=#{Formula["lld"].opt_bin}/ld.lld"
 
       system "cmake", "--build", "build", "--target", "shared-lib"
@@ -68,6 +80,11 @@ class Libasciichat < Formula
   end
 
   test do
+    if (prefix/"build").exist?
+      cd prefix/"build" do
+        system "ctest", "--output-on-failure", "--verbose"
+      end
+    end
     (testpath/"test.c").write <<~EOS
       #include <asciichat/log.h>
       int main() {
