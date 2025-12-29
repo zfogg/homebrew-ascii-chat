@@ -14,7 +14,6 @@ class AsciiChat < Formula
   depends_on "ninja" => :build
   depends_on "opus" => :build
   depends_on "portaudio" => :build
-  depends_on "speexdsp" => :build
   depends_on "zstd" => :build
   depends_on "criterion" => :test
 
