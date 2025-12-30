@@ -49,10 +49,23 @@ class Libasciichat < Formula
       ENV["CC"] = Formula["llvm"].opt_bin/"clang"
       ENV["CXX"] = Formula["llvm"].opt_bin/"clang++"
 
+      # Download pre-built defer tool from build-tools release
+      # This avoids building the defer tool from source, which requires matching LLVM versions
+      defer_tool_dir = buildpath/".deps-cache/defer-tool"
+      defer_tool_dir.mkpath
+      defer_tool_path = defer_tool_dir/"ascii-instr-defer"
+
+      # Download the macOS universal binary
+      defer_url = "https://github.com/zfogg/ascii-chat/releases/download/build-tools/ascii-instr-defer.macOS.universal"
+      system "curl", "-fsSL", "-o", defer_tool_path, defer_url
+      defer_tool_path.chmod 0755
+      ohai "Downloaded pre-built defer tool from build-tools release"
+
       llvm_bin = Formula["llvm"].opt_bin
       system "cmake", "-B", "build", "-S", ".", "-G", "Ninja",
              "-DCMAKE_BUILD_TYPE=Release",
              "-DCMAKE_INSTALL_PREFIX=#{prefix}",
+             "-DASCIICHAT_DEFER_TOOL=#{defer_tool_path}",
              "-DASCIICHAT_LLVM_CONFIG_EXECUTABLE=#{llvm_bin}/llvm-config",
              "-DASCIICHAT_CLANG_EXECUTABLE=#{llvm_bin}/clang",
              "-DASCIICHAT_CLANG_PLUS_PLUS_EXECUTABLE=#{llvm_bin}/clang++",
