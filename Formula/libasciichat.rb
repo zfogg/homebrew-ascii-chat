@@ -101,7 +101,9 @@ class Libasciichat < Formula
         end
       end
 
-      system "cmake", "--install", "build"
+      # Install only Development and Documentation components (not Runtime which is the main binary)
+      system "cmake", "--install", "build", "--component", "Development"
+      system "cmake", "--install", "build", "--component", "Documentation"
     else
       # Package extracts directly with include/, lib/, etc. at the root
       include.install Dir["include/*"]
