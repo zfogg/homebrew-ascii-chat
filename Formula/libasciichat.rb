@@ -51,6 +51,10 @@ class Libasciichat < Formula
       ENV["OBJC"] = Formula["llvm"].opt_bin/"clang"
       ENV["OBJCXX"] = Formula["llvm"].opt_bin/"clang++"
 
+      # Use Homebrew LLVM's bundled libunwind (from brew info llvm)
+      llvm_lib = Formula["llvm"].opt_lib
+      ENV["LDFLAGS"] = "-L#{llvm_lib}/unwind -lunwind"
+
       # Download pre-built defer tool from build-tools release
       # This avoids building the defer tool from source, which requires matching LLVM versions
       defer_tool_dir = buildpath/".deps-cache/defer-tool"
@@ -90,17 +94,6 @@ class Libasciichat < Formula
       system "cmake", "--build", "build", "--target", "static-lib"
       system "cmake", "--build", "build", "--target", "docs"
 
-      # Fix libunwind dependency in shared library - Homebrew's LLVM links against its own libunwind.1.dylib
-      # but Release builds should use system libunwind (built into libc++)
-      Dir.glob("build/lib/*.dylib").each do |dylib|
-        libunwind_dep = Utils.safe_popen_read("otool", "-L", dylib).lines.find { |l| l.include?("libunwind") }
-        if libunwind_dep
-          libunwind_path = libunwind_dep.strip.split.first
-          ohai "Removing dynamic libunwind dependency from #{File.basename(dylib)}: #{libunwind_path}"
-          system "install_name_tool", "-change", libunwind_path, "/usr/lib/libSystem.B.dylib", dylib
-        end
-      end
-
       # Install library components (not Runtime which is the main binary)
       system "cmake", "--install", "build", "--component", "Unspecified"
       system "cmake", "--install", "build", "--component", "Development"
@@ -116,19 +109,17 @@ class Libasciichat < Formula
   end
 
   test do
-    if (prefix/"build").exist?
-      cd prefix/"build" do
-        system "ctest", "--output-on-failure", "--verbose"
-      end
-    end
     (testpath/"test.c").write <<~EOS
-      #include <asciichat/log.h>
+      #include <ascii-chat/log/logging.h>
       int main() {
+        log_init(NULL, LOG_INFO, true, false);
         log_info("libasciichat test");
+        log_destroy();
         return 0;
       }
     EOS
-    system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lasciichat", "-o", "test"
+    # Need both include paths: one for <ascii-chat/...> and one for internal relative includes
+    system ENV.cc, "test.c", "-I#{include}", "-I#{include}/ascii-chat", "-L#{lib}", "-lasciichat", "-o", "test"
     assert_match "libasciichat test", shell_output("./test 2>&1")
   end
 end

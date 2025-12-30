@@ -50,6 +50,10 @@ class AsciiChat < Formula
       ENV["OBJC"] = Formula["llvm"].opt_bin/"clang"
       ENV["OBJCXX"] = Formula["llvm"].opt_bin/"clang++"
 
+      # Use Homebrew LLVM's bundled libunwind (from brew info llvm)
+      llvm_lib = Formula["llvm"].opt_lib
+      ENV["LDFLAGS"] = "-L#{llvm_lib}/unwind -lunwind"
+
       # Download pre-built defer tool from build-tools release
       # This avoids building the defer tool from source, which requires matching LLVM versions
       defer_tool_dir = buildpath/".deps-cache/defer-tool"
@@ -92,16 +96,6 @@ class AsciiChat < Formula
       system "cmake", "--build", "build", "--target", "ascii-chat"
       system "cmake", "--build", "build", "--target", "man1"
 
-      # Fix libunwind dependency - Homebrew's LLVM links against its own libunwind.1.dylib
-      # but Release builds should use system libunwind (built into libc++)
-      ascii_chat_binary = "build/bin/ascii-chat"
-      libunwind_dep = Utils.safe_popen_read("otool", "-L", ascii_chat_binary).lines.find { |l| l.include?("libunwind") }
-      if libunwind_dep
-        libunwind_path = libunwind_dep.strip.split.first
-        ohai "Removing dynamic libunwind dependency: #{libunwind_path}"
-        system "install_name_tool", "-change", libunwind_path, "/usr/lib/libSystem.B.dylib", ascii_chat_binary
-      end
-
       bin.install "build/bin/ascii-chat"
       man1.install "build/docs/ascii-chat.1"
       bash_completion.install "share/completions/ascii-chat.bash" => "ascii-chat"
@@ -124,11 +118,6 @@ class AsciiChat < Formula
   end
 
   test do
-    if (prefix/"build").exist?
-      cd prefix/"build" do
-        system "ctest", "--output-on-failure", "--verbose"
-      end
-    end
-    assert_match "ascii-chat", shell_output("#{bin}/ascii-chat --help 2>&1", 1)
+    assert_match "ascii-chat", shell_output("#{bin}/ascii-chat --help 2>&1")
   end
 end
