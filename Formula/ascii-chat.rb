@@ -10,7 +10,7 @@ class AsciiChat < Formula
   depends_on "gnupg" => :build
 
   # Build dependencies only needed when building from source (--HEAD)
-  if build.head?
+  head do
     depends_on "cmake" => :build
     depends_on "libsodium" => :build
     depends_on "lld" => :build
