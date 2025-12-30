@@ -61,10 +61,14 @@ class Libasciichat < Formula
       defer_tool_path.chmod 0755
       ohai "Downloaded pre-built defer tool from build-tools release"
 
+      # Get macOS SDK path for Homebrew LLVM
+      sdk_path = Utils.safe_popen_read("xcrun", "--show-sdk-path").chomp
+
       llvm_bin = Formula["llvm"].opt_bin
       system "cmake", "-B", "build", "-S", ".", "-G", "Ninja",
              "-DCMAKE_BUILD_TYPE=Release",
              "-DCMAKE_INSTALL_PREFIX=#{prefix}",
+             "-DCMAKE_OSX_SYSROOT=#{sdk_path}",
              "-DASCIICHAT_DEFER_TOOL=#{defer_tool_path}",
              "-DASCIICHAT_ENABLE_ANALYZERS=OFF",
              "-DASCIICHAT_LLVM_CONFIG_EXECUTABLE=#{llvm_bin}/llvm-config",
