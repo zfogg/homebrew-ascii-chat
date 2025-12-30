@@ -1,48 +1,98 @@
 class Libasciichat < Formula
   desc "Development libraries and documentation for ascii-chat"
   homepage "https://github.com/zfogg/ascii-chat"
-  version "0.4.12"
+  version "0.5.64"
   license "MIT"
 
   head "https://github.com/zfogg/ascii-chat.git", branch: "master"
 
-  depends_on "cmake" => :build
-  depends_on "doxygen" => :build
-  depends_on "libsodium" => :build
-  depends_on "lld" => :build
-  depends_on "llvm" => :build
-  depends_on "mimalloc" => :build
-  depends_on "ninja" => :build
-  depends_on "opus" => :build
-  depends_on "portaudio" => :build
-  depends_on "zstd" => :build
-  depends_on "criterion" => :test
+  # Runtime dependencies needed when linking against the library
+  depends_on "zstd"
+  depends_on "libsodium"
+  depends_on "opus"
+  depends_on "mimalloc"
+  depends_on "portaudio"
+
+  # GPG needed for signature verification
+  depends_on "gnupg" => :build
+
+  # Build dependencies only needed when building from source (--HEAD)
+  if build.head?
+    depends_on "cmake" => :build
+    depends_on "doxygen" => :build
+    depends_on "lld" => :build
+    depends_on "llvm" => :build
+    depends_on "ninja" => :build
+    depends_on "criterion" => :test
+  end
 
   on_macos do
     on_arm do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-macOS-arm64.tar.gz"
-      sha256 "0a507bacd9439757eb4e5163859b9aa0e30b3859ee7fd86c2083ddebdb42339c"
+      sha256 "2148c1821904a961a36c7aae3c4e5cb26859fdcce71d917238e522148019c181"
     end
 
     on_intel do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-macOS-amd64.tar.gz"
-      sha256 "7c74d2cd5db934b8ef672443a7b0864f54eb09371f6efdf7941657648110231d"
+      sha256 "82c18d61d64fe26aba27f18599c094572f78085165e57c67d169329457c1cf70"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-Linux-arm64.tar.gz"
-      sha256 "93834470fda9eb849efaa1db0ed60fd68fec377b097a169827445aa08834cc3e"
+      sha256 "e930e2ecb6e4dd38f867fd8963f982a5738bee3985d503798c29b27b7a246afb"
     end
 
     on_intel do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/libasciichat-#{version}-Linux-amd64.tar.gz"
-      sha256 "346bc0e1a9328ffb16d53e04f1157452e1f809dd83c78eb27ce3d002f3cfe628"
+      sha256 "d9d62b59fa30a5db1f08d580773886e76cf4ecd7d7af0dce614b1187e04d3ee1"
     end
   end
 
+  # GPG signature verification resources
+  resource "sig-macos-arm64" do
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.5.64/libasciichat-0.5.64-macOS-arm64.tar.gz.asc"
+    sha256 "45c868a828e43d27edae9fb6d83e863e889d020980596ef443824d97bd21d27e"
+  end
+
+  resource "sig-macos-amd64" do
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.5.64/libasciichat-0.5.64-macOS-amd64.tar.gz.asc"
+    sha256 "a39f8c01d79da0e6da572920690e9a537cf9f7364b3082bc28e56c8fb42df722"
+  end
+
+  resource "sig-linux-arm64" do
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.5.64/libasciichat-0.5.64-Linux-arm64.tar.gz.asc"
+    sha256 "2dc9b8c4dd11b5850051bfb996607c506bd9640bc182c6e4f59c1c29d7417a4d"
+  end
+
+  resource "sig-linux-amd64" do
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.5.64/libasciichat-0.5.64-Linux-amd64.tar.gz.asc"
+    sha256 "979a02b8333a1f0ba26ddfbf835f2e9cc28067b555fe1b7e1fdbdfcad87a6d47"
+  end
+
   def install
+    unless build.head?
+      # Import GPG public key for signature verification
+      gpg_key = "F315D1B948F33B2102FBD7B6B95124621822044A"
+      system "gpg", "--keyserver", "keyserver.ubuntu.com", "--recv-keys", gpg_key
+
+      # Determine which signature resource to use based on platform
+      sig_resource = if OS.mac?
+        Hardware::CPU.arm? ? "sig-macos-arm64" : "sig-macos-amd64"
+      else
+        Hardware::CPU.arm? ? "sig-linux-arm64" : "sig-linux-amd64"
+      end
+
+      # Download and verify signature
+      resource(sig_resource).stage do
+        sig_file = Dir["*.asc"].first
+        tarball = cached_download
+        system "gpg", "--verify", sig_file, tarball
+        ohai "GPG signature verification successful"
+      end
+    end
+
     if build.head?
       system "git", "submodule", "update", "--init", "--recursive"
 
