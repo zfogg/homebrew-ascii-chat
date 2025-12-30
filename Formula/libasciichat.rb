@@ -66,6 +66,7 @@ class Libasciichat < Formula
              "-DCMAKE_BUILD_TYPE=Release",
              "-DCMAKE_INSTALL_PREFIX=#{prefix}",
              "-DASCIICHAT_DEFER_TOOL=#{defer_tool_path}",
+             "-DASCIICHAT_ENABLE_ANALYZERS=OFF",
              "-DASCIICHAT_LLVM_CONFIG_EXECUTABLE=#{llvm_bin}/llvm-config",
              "-DASCIICHAT_CLANG_EXECUTABLE=#{llvm_bin}/clang",
              "-DASCIICHAT_CLANG_PLUS_PLUS_EXECUTABLE=#{llvm_bin}/clang++",
