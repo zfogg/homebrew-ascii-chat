@@ -48,6 +48,8 @@ class Libasciichat < Formula
 
       ENV["CC"] = Formula["llvm"].opt_bin/"clang"
       ENV["CXX"] = Formula["llvm"].opt_bin/"clang++"
+      ENV["OBJC"] = Formula["llvm"].opt_bin/"clang"
+      ENV["OBJCXX"] = Formula["llvm"].opt_bin/"clang++"
 
       # Download pre-built defer tool from build-tools release
       # This avoids building the defer tool from source, which requires matching LLVM versions
@@ -69,6 +71,8 @@ class Libasciichat < Formula
              "-DCMAKE_BUILD_TYPE=Release",
              "-DCMAKE_INSTALL_PREFIX=#{prefix}",
              "-DCMAKE_OSX_SYSROOT=#{sdk_path}",
+             "-DCMAKE_OBJC_COMPILER=#{llvm_bin}/clang",
+             "-DCMAKE_OBJCXX_COMPILER=#{llvm_bin}/clang++",
              "-DASCIICHAT_DEFER_TOOL=#{defer_tool_path}",
              "-DASCIICHAT_ENABLE_ANALYZERS=OFF",
              "-DASCIICHAT_LLVM_CONFIG_EXECUTABLE=#{llvm_bin}/llvm-config",
