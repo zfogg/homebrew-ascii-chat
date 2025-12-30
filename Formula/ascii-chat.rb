@@ -92,6 +92,16 @@ class AsciiChat < Formula
       system "cmake", "--build", "build", "--target", "ascii-chat"
       system "cmake", "--build", "build", "--target", "man1"
 
+      # Fix libunwind dependency - Homebrew's LLVM links against its own libunwind.1.dylib
+      # but Release builds should use system libunwind (built into libc++)
+      ascii_chat_binary = "build/bin/ascii-chat"
+      libunwind_dep = Utils.safe_popen_read("otool", "-L", ascii_chat_binary).lines.find { |l| l.include?("libunwind") }
+      if libunwind_dep
+        libunwind_path = libunwind_dep.strip.split.first
+        ohai "Removing dynamic libunwind dependency: #{libunwind_path}"
+        system "install_name_tool", "-change", libunwind_path, "/usr/lib/libSystem.B.dylib", ascii_chat_binary
+      end
+
       bin.install "build/bin/ascii-chat"
       man1.install "build/docs/ascii-chat.1"
       bash_completion.install "share/completions/ascii-chat.bash" => "ascii-chat"

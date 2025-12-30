@@ -90,6 +90,17 @@ class Libasciichat < Formula
       system "cmake", "--build", "build", "--target", "static-lib"
       system "cmake", "--build", "build", "--target", "docs"
 
+      # Fix libunwind dependency in shared library - Homebrew's LLVM links against its own libunwind.1.dylib
+      # but Release builds should use system libunwind (built into libc++)
+      Dir.glob("build/lib/*.dylib").each do |dylib|
+        libunwind_dep = Utils.safe_popen_read("otool", "-L", dylib).lines.find { |l| l.include?("libunwind") }
+        if libunwind_dep
+          libunwind_path = libunwind_dep.strip.split.first
+          ohai "Removing dynamic libunwind dependency from #{File.basename(dylib)}: #{libunwind_path}"
+          system "install_name_tool", "-change", libunwind_path, "/usr/lib/libSystem.B.dylib", dylib
+        end
+      end
+
       system "cmake", "--install", "build"
     else
       # Package extracts directly with include/, lib/, etc. at the root
