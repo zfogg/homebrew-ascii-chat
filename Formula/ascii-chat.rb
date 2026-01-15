@@ -1,13 +1,14 @@
 class AsciiChat < Formula
   desc "Video chat in your terminal"
   homepage "https://github.com/zfogg/ascii-chat"
-  version "0.5.64"
+  version "0.6.0"
   license "MIT"
 
   head "https://github.com/zfogg/ascii-chat.git", branch: "master"
 
-  # Only gnupg is needed for binary installs (signature verification)
-  depends_on "gnupg" => :build
+  # Runtime dependencies
+  depends_on "ca-certificates"
+  depends_on "gnupg"
 
   # Build dependencies only needed when building from source (--HEAD)
   head do
@@ -26,46 +27,59 @@ class AsciiChat < Formula
   on_macos do
     on_arm do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-arm64.tar.gz"
-      sha256 "aadb8251a141d3c9a68654578532467f3ba0c8373df955c80f98191cb91889a0"
+      sha256 "1bd32722aada3aa6bfa91e8639420640565ca45f1ce790435240d86ed53ac3b5"
     end
 
     on_intel do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-macOS-amd64.tar.gz"
-      sha256 "1c681977c2d9925132ef39c41e51b4cb28b650a6630b1d96e3c5b9000cbfae19"
+      sha256 "fdb2c6c6e4ef24ab547b29ca79e10f1153a31e11f0bdb27f440185eb5458fc09"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-arm64.tar.gz"
-      sha256 "04d559eea95bb99d6a1c6ea0082ab1b7da28ead5fc75b20d01d5967be287f08c"
+      sha256 "de404f0f8cd02abc3456ab4ecdcfd1fe318705c47be7409329f05fac1a50efa5"
     end
 
     on_intel do
       url "https://github.com/zfogg/ascii-chat/releases/download/v#{version}/ascii-chat-#{version}-Linux-amd64.tar.gz"
-      sha256 "ab4e25c54dbb07b6a4108aaaa113a71d74c9d23974c0a59ccd92d7a8b674c382"
+      sha256 "0f90e6279d2474629c0f3849aca29e6d319f1286204b91fa7f63b149d5780c4f"
     end
   end
 
   # GPG signature verification resources
   resource "sig-macos-arm64" do
-    url "https://github.com/zfogg/ascii-chat/releases/download/v0.5.64/ascii-chat-0.5.64-macOS-arm64.tar.gz.asc"
-    sha256 "ae65dce5131d3bbeeec9abafdcaae03b6a1f9dc16113aeb014f035ba23634a6b"
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.6.0/ascii-chat-0.6.0-macOS-arm64.tar.gz.asc"
+    sha256 "ffe85b88373b478c0e5d3b75e0b0a324316fb3f730acf3e252ca9ce03f5225ce"
   end
 
   resource "sig-macos-amd64" do
-    url "https://github.com/zfogg/ascii-chat/releases/download/v0.5.64/ascii-chat-0.5.64-macOS-amd64.tar.gz.asc"
-    sha256 "498459f956b4507ca1dc1b63fabd10d86edaa4c83da99e5bc4d0faf389da6a1f"
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.6.0/ascii-chat-0.6.0-macOS-amd64.tar.gz.asc"
+    sha256 "a5263c1144cca3fcd910433a6e368bde083f4cc75c9697a25b3c0805b12c6e1d"
   end
 
   resource "sig-linux-arm64" do
-    url "https://github.com/zfogg/ascii-chat/releases/download/v0.5.64/ascii-chat-0.5.64-Linux-arm64.tar.gz.asc"
-    sha256 "57cfa5932b6d4f9bd9af580bdbd9a688976bbda85268517c17a44096ab5c7503"
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.6.0/ascii-chat-0.6.0-Linux-arm64.tar.gz.asc"
+    sha256 "22e370cc446ac539f30962edbdea048f62f7072600ac3be9177fe844acd1149e"
   end
 
   resource "sig-linux-amd64" do
-    url "https://github.com/zfogg/ascii-chat/releases/download/v0.5.64/ascii-chat-0.5.64-Linux-amd64.tar.gz.asc"
-    sha256 "2930c0d1cf703e05a97e8975eae49cc9fff192517527fcd8c7f65fcec9fd7713"
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.6.0/ascii-chat-0.6.0-Linux-amd64.tar.gz.asc"
+    sha256 "53853711f453f428ea7521ceb866064e2296db6a369294a6dfbbebf5844c6da8"
+  end
+
+  # Homebrew service for running ascii-chat server
+  # Start: brew services start ascii-chat
+  # Stop: brew services stop ascii-chat
+  # Configure: edit ~/.config/ascii-chat/config.toml
+  # Generate config: ascii-chat --config-create
+  service do
+    run [opt_bin/"ascii-chat", "server"]
+    keep_alive crashed: true
+    working_dir var
+    log_path var/"log/ascii-chat.log"
+    error_log_path var/"log/ascii-chat.log"
   end
 
   def install
@@ -163,6 +177,21 @@ class AsciiChat < Formula
         fish_completion.install "share/fish/vendor_completions.d/ascii-chat.fish"
       end
     end
+  end
+
+  def caveats
+    <<~EOS
+      To run ascii-chat server as a background service:
+        brew services start ascii-chat
+
+      Before starting the service, create a config file:
+        ascii-chat --config-create
+
+      Then edit ~/.config/ascii-chat/config.toml to configure your server.
+
+      Service logs are written to:
+        #{var}/log/ascii-chat.log
+    EOS
   end
 
   test do

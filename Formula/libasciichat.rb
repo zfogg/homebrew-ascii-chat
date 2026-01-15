@@ -7,14 +7,13 @@ class Libasciichat < Formula
   head "https://github.com/zfogg/ascii-chat.git", branch: "master"
 
   # Runtime dependencies needed when linking against the library
+  depends_on "ca-certificates"
+  depends_on "gnupg"
   depends_on "zstd"
   depends_on "libsodium"
   depends_on "opus"
   depends_on "mimalloc"
   depends_on "portaudio"
-
-  # GPG needed for signature verification
-  depends_on "gnupg" => :build
 
   # Build dependencies only needed when building from source (--HEAD)
   head do
