@@ -6,14 +6,18 @@ class Libasciichat < Formula
 
   head "https://github.com/zfogg/ascii-chat.git", branch: "master"
 
-  # Runtime dependencies needed when linking against the library
+  # Runtime dependencies - needed when linking against the library
+  # The shared library is dynamically linked against Homebrew libraries
+  depends_on "abseil"
   depends_on "ca-certificates"
+  depends_on "ffmpeg"
   depends_on "gnupg"
-  depends_on "zstd"
   depends_on "libsodium"
-  depends_on "opus"
   depends_on "mimalloc"
+  depends_on "opus"
   depends_on "portaudio"
+  depends_on "sqlite"
+  depends_on "zstd"
 
   # Build dependencies only needed when building from source (--HEAD)
   head do
@@ -22,7 +26,6 @@ class Libasciichat < Formula
     depends_on "lld" => :build
     depends_on "llvm" => :build
     depends_on "ninja" => :build
-    depends_on "criterion" => :test
   end
 
   on_macos do
@@ -100,9 +103,11 @@ class Libasciichat < Formula
       ENV["OBJC"] = Formula["llvm"].opt_bin/"clang"
       ENV["OBJCXX"] = Formula["llvm"].opt_bin/"clang++"
 
-      # Use Homebrew LLVM's bundled libunwind (from brew info llvm)
+      # Set up paths for Homebrew dependencies
       llvm_lib = Formula["llvm"].opt_lib
-      ENV["LDFLAGS"] = "-L#{llvm_lib}/unwind -lunwind"
+      ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib -L#{llvm_lib}/unwind -lunwind"
+      ENV["CPPFLAGS"] = "-I#{HOMEBREW_PREFIX}/include"
+      ENV["PKG_CONFIG_PATH"] = "#{HOMEBREW_PREFIX}/lib/pkgconfig:#{HOMEBREW_PREFIX}/share/pkgconfig"
 
       # Download pre-built defer tool from build-tools release
       # This avoids building the defer tool from source, which requires matching LLVM versions
@@ -126,6 +131,9 @@ class Libasciichat < Formula
              "-DCMAKE_OSX_SYSROOT=#{sdk_path}",
              "-DCMAKE_OBJC_COMPILER=#{llvm_bin}/clang",
              "-DCMAKE_OBJCXX_COMPILER=#{llvm_bin}/clang++",
+             "-DCMAKE_EXE_LINKER_FLAGS=-L#{HOMEBREW_PREFIX}/lib -L#{llvm_lib}/unwind -lunwind",
+             "-DCMAKE_SHARED_LINKER_FLAGS=-L#{HOMEBREW_PREFIX}/lib",
+             "-DASCIICHAT_SHARED_DEPS=ON",
              "-DASCIICHAT_DEFER_TOOL=#{defer_tool_path}",
              "-DASCIICHAT_ENABLE_ANALYZERS=OFF",
              "-DASCIICHAT_LLVM_CONFIG_EXECUTABLE=#{llvm_bin}/llvm-config",
