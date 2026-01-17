@@ -162,16 +162,28 @@ class AsciiChat < Formula
 
       system "cmake", *cmake_args
 
+      # Build the shared library first
+      ohai "Building libasciichat shared library..."
+      system "cmake", "--build", "build", "--target", "shared-lib"
+      system "cmake", "--build", "build", "--target", "static-lib"
+
+      # Install the library components
+      ohai "Installing libasciichat..."
+      system "cmake", "--install", "build", "--component", "Unspecified"
+      system "cmake", "--install", "build", "--component", "Development"
+      system "cmake", "--install", "build", "--component", "Manpages"
+
+      # Build the ascii-chat binary (links against the library we just built)
+      ohai "Building ascii-chat binary..."
       system "cmake", "--build", "build", "--target", "ascii-chat"
       system "cmake", "--build", "build", "--target", "man1"
 
+      # Install the binary and related files
       bin.install "build/bin/ascii-chat"
       man1.install "build/share/man/man1/ascii-chat.1"
       bash_completion.install "share/bash-completion/completions/ascii-chat"
       zsh_completion.install "share/zsh/site-functions/_ascii-chat"
       fish_completion.install "share/fish/vendor_completions.d/ascii-chat.fish"
-
-      (prefix/"build").install Dir["build/*"]
     else
       working_dir = Dir.exist?("bin") ? "." : Dir["ascii-chat-*"].first
       raise "Could not find ascii-chat directory" unless working_dir
@@ -198,10 +210,29 @@ class AsciiChat < Formula
 
       Service logs are written to:
         #{var}/log/ascii-chat.log
+
+      Development library (libasciichat) installed to:
+        Headers: #{include}/ascii-chat
+        Library: #{lib}/libasciichat.dylib
+        Docs:    https://zfogg.github.io/ascii-chat/
     EOS
   end
 
   test do
+    # Test the binary
     assert_match "ascii-chat", shell_output("#{bin}/ascii-chat --help 2>&1")
+
+    # Test linking against the library
+    (testpath/"test.c").write <<~EOS
+      #include <ascii-chat/log/logging.h>
+      int main() {
+        log_init(NULL, LOG_INFO, true, false);
+        log_info("libasciichat test");
+        log_destroy();
+        return 0;
+      }
+    EOS
+    system ENV.cc, "test.c", "-I#{include}", "-I#{include}/ascii-chat", "-L#{lib}", "-lasciichat", "-o", "test"
+    assert_match "libasciichat test", shell_output("./test 2>&1")
   end
 end
