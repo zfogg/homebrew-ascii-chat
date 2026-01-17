@@ -12,7 +12,10 @@ class AsciiChat < Formula
   depends_on "ffmpeg"
   depends_on "gnupg"
   depends_on "libsodium"
+  depends_on "llvm"  # For libunwind runtime
   depends_on "mimalloc"
+  depends_on "miniupnpc"  # For UPnP/NAT-PMP port mapping
+  depends_on "openssl@3"  # For TURN credentials
   depends_on "opus"
   depends_on "portaudio"
   depends_on "sqlite"
@@ -22,7 +25,6 @@ class AsciiChat < Formula
   head do
     depends_on "cmake" => :build
     depends_on "lld" => :build
-    depends_on "llvm" => :build
     depends_on "ninja" => :build
   end
 
