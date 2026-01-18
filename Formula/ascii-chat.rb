@@ -9,6 +9,7 @@ class AsciiChat < Formula
   depends_on "cmake" => :build
   depends_on "lld" => :build
   depends_on "ninja" => :build
+  depends_on "pkgconf" => :build
   depends_on "abseil"
   depends_on "ffmpeg"
   depends_on "libsodium"
