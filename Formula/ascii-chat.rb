@@ -1,8 +1,8 @@
 class AsciiChat < Formula
   desc "Real-time terminal video chat with ASCII art conversion"
   homepage "https://github.com/zfogg/ascii-chat"
-  url "https://github.com/zfogg/ascii-chat/archive/refs/tags/v0.6.12.tar.gz"
-  sha256 "3498b09d9e8b645fe741e00ecd854afd2b3f273b70cfb714f5eea4259f4379a9"
+  url "https://github.com/zfogg/ascii-chat/archive/refs/tags/v0.7.1.tar.gz"
+  sha256 "3ea427c7a3f0d42e7ea3059d19ff5941807bf04d983f9194ff78a55d0dcd2269"
   license "MIT"
   head "https://github.com/zfogg/ascii-chat.git", branch: "master"
 
@@ -23,7 +23,8 @@ class AsciiChat < Formula
   depends_on "zstd"
 
   resource "bearssl" do
-    url "https://www.bearssl.org/git/BearSSL", using: :git, revision: "3d9be2f60b7764e46836514bcd6e453abdfa864a"
+    url "https://github.com/zfogg/ascii-chat/releases/download/build-tools/bearssl-3d9be2f.tar.gz"
+    sha256 "6e63b4a78cfb370634bd027b6eeeca2664ddb71afbb03f00952897937c8c55a6"
   end
 
   resource "libsodium-bcrypt-pbkdf" do
@@ -46,13 +47,32 @@ class AsciiChat < Formula
     sha256 "e1003e4a640e503b3d0c486b3508cede9c9c177bae38961005211bd78c4c2042"
   end
 
+  resource "uthash" do
+    url "https://github.com/troydhanson/uthash/archive/af6e637f19c102167fb914b9ebcc171389270b48.tar.gz"
+    sha256 "d12aa79182b36c3870a09c2738ee2cd8c2218e7c84c5b3f21456087fade17f76"
+  end
+
   def install
-    # Stage vendored dependencies
-    (buildpath/"deps/bearssl").install resource("bearssl")
-    (buildpath/"deps/libsodium-bcrypt-pbkdf").install resource("libsodium-bcrypt-pbkdf")
-    (buildpath/"deps/mdns").install resource("mdns")
-    (buildpath/"deps/sokol").install resource("sokol")
-    (buildpath/"deps/tomlc17").install resource("tomlc17")
+    # For HEAD builds, initialize submodules; for releases, use resources
+    if build.head?
+      system "git", "submodule", "update", "--init", "--recursive"
+    else
+      # Stage vendored dependencies for tarball releases (submodules not included)
+      (buildpath/"deps/ascii-chat-deps/bearssl").install resource("bearssl")
+      (buildpath/"deps/ascii-chat-deps/libsodium-bcrypt-pbkdf").install resource("libsodium-bcrypt-pbkdf")
+      (buildpath/"deps/ascii-chat-deps/mdns").install resource("mdns")
+      (buildpath/"deps/ascii-chat-deps/sokol").install resource("sokol")
+      (buildpath/"deps/ascii-chat-deps/tomlc17").install resource("tomlc17")
+      (buildpath/"deps/ascii-chat-deps/uthash").install resource("uthash")
+
+      # Create git repo for version detection (tarballs don't include .git)
+      system "git", "init"
+      system "git", "config", "user.email", "brew@localhost"
+      system "git", "config", "user.name", "Homebrew"
+      system "git", "add", "-A"
+      system "git", "commit", "-m", "v#{version}"
+      system "git", "tag", "v#{version}"
+    end
 
     # Use Homebrew LLVM for consistent ABI
     llvm = Formula["llvm"]
@@ -62,7 +82,8 @@ class AsciiChat < Formula
     ENV["OBJCXX"] = llvm.opt_bin/"clang++"
 
     # Set up linker flags for Homebrew dependencies
-    ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib -L#{llvm.opt_lib}/unwind -lunwind"
+    # Include both unwind and c++ library paths to use Homebrew's libc++ instead of system
+    ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib -L#{llvm.opt_lib}/unwind -L#{llvm.opt_lib}/c++ -lunwind -Wl,-rpath,#{llvm.opt_lib}/c++ -Wl,-rpath,#{llvm.opt_lib}/unwind"
     ENV["CPPFLAGS"] = "-I#{HOMEBREW_PREFIX}/include"
     ENV["PKG_CONFIG_PATH"] = "#{HOMEBREW_PREFIX}/lib/pkgconfig:#{HOMEBREW_PREFIX}/share/pkgconfig"
 
@@ -110,8 +131,8 @@ class AsciiChat < Formula
         -DCMAKE_OSX_SYSROOT=#{sdk_path}
         -DCMAKE_OBJC_COMPILER=#{llvm.opt_bin}/clang
         -DCMAKE_OBJCXX_COMPILER=#{llvm.opt_bin}/clang++
-        -DCMAKE_EXE_LINKER_FLAGS=-L#{HOMEBREW_PREFIX}/lib\ -L#{llvm.opt_lib}/unwind\ -lunwind
-        -DCMAKE_SHARED_LINKER_FLAGS=-L#{HOMEBREW_PREFIX}/lib
+        -DCMAKE_EXE_LINKER_FLAGS=-L#{HOMEBREW_PREFIX}/lib\ -L#{llvm.opt_lib}/unwind\ -L#{llvm.opt_lib}/c++\ -lunwind\ -Wl,-rpath,#{llvm.opt_lib}/c++\ -Wl,-rpath,#{llvm.opt_lib}/unwind
+        -DCMAKE_SHARED_LINKER_FLAGS=-L#{HOMEBREW_PREFIX}/lib\ -L#{llvm.opt_lib}/c++\ -Wl,-rpath,#{llvm.opt_lib}/c++
       ]
     end
 
