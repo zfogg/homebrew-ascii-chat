@@ -28,8 +28,8 @@ class AsciiChat < Formula
   end
 
   resource "libsodium-bcrypt-pbkdf" do
-    url "https://github.com/zfogg/libsodium-bcrypt-pbkdf/archive/650031b7e82bad719b8e1c98f51522f68e4a10e0.tar.gz"
-    sha256 "80e54cd9d509de178c2029a1e30b84b4cf07101760f9b38088fd4fcaa56431f0"
+    url "https://github.com/zfogg/libsodium-bcrypt-pbkdf/archive/47ca0cc6dee63108804a94997ee0835e6000d976.tar.gz"
+    sha256 "82119f0b1feeca57a75f7b2007c8070afd2aa56e292f559f0e753ab9b69a25fb"
   end
 
   resource "mdns" do
@@ -38,13 +38,13 @@ class AsciiChat < Formula
   end
 
   resource "sokol" do
-    url "https://github.com/floooh/sokol/archive/f38e0b520f99a501b71172c3a3181c9ab6ebdd79.tar.gz"
-    sha256 "baba806c97ba23a414bf09c29830fe4af16561174e19baa0cf8027cccb33a01d"
+    url "https://github.com/floooh/sokol/archive/d76e1f1d25d5dfb800b5f30dd76076ef50310af3.tar.gz"
+    sha256 "a473ac46d50b76e8bb5947e426df91dffdee5c51714b9ca7b18bcef182b66baa"
   end
 
   resource "tomlc17" do
-    url "https://github.com/cktan/tomlc17/archive/7f3bd33e7356787f665fc7c06ff81d38adb8158c.tar.gz"
-    sha256 "e1003e4a640e503b3d0c486b3508cede9c9c177bae38961005211bd78c4c2042"
+    url "https://github.com/cktan/tomlc17/archive/b256fbf714c9edc8645010e3e44c1b6980da67b9.tar.gz"
+    sha256 "f8c86c740b924b7391794afa04788cf064cd0dcafa3e3ff6ab1610842c9df1f0"
   end
 
   resource "uthash" do
