@@ -1,11 +1,32 @@
 class AsciiChat < Formula
   desc "Real-time terminal video chat with ASCII art conversion"
   homepage "https://github.com/zfogg/ascii-chat"
-  url "https://github.com/zfogg/ascii-chat/archive/refs/tags/v0.7.1.tar.gz"
-  sha256 "3ea427c7a3f0d42e7ea3059d19ff5941807bf04d983f9194ff78a55d0dcd2269"
   license "MIT"
   head "https://github.com/zfogg/ascii-chat.git", branch: "master"
 
+  # Use pre-built binaries by default, source tarball for --build-from-source
+  if OS.mac? && Hardware::CPU.arm?
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.1/ascii-chat-0.7.1-macOS-arm64.tar.gz"
+    sha256 "773fb130c853c4d00834c02592d0c244a08cdbec7d973aecfb32db0b46c1b855"
+  elsif OS.mac? && Hardware::CPU.intel?
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.1/ascii-chat-0.7.1-macOS-amd64.tar.gz"
+    sha256 "64a870c1e0a625518bc45c2c31df444fe52ee2a3935bf38ad390bb49f9634c8b"
+  elsif OS.linux? && Hardware::CPU.arm?
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.1/ascii-chat-0.7.1-Linux-arm64.tar.gz"
+    sha256 "23726bdc54a9ebc03b8decbfb40c1adb8238c41293123c2675a426bdbee99a2f"
+  else
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.1/ascii-chat-0.7.1-Linux-amd64.tar.gz"
+    sha256 "c810adc60208eadc39188a9cd2f572c210e4adf5aa27eead90d6d55cbc8fd30d"
+  end
+  version "0.7.1"
+
+  # Source tarball for --build-from-source
+  resource "source" do
+    url "https://github.com/zfogg/ascii-chat/archive/refs/tags/v0.7.1.tar.gz"
+    sha256 "3ea427c7a3f0d42e7ea3059d19ff5941807bf04d983f9194ff78a55d0dcd2269"
+  end
+
+  # Build dependencies (only needed for --build-from-source or --HEAD)
   depends_on "cmake" => :build
   depends_on "lld" => :build
   depends_on "ninja" => :build
@@ -22,6 +43,7 @@ class AsciiChat < Formula
   depends_on "sqlite"
   depends_on "zstd"
 
+  # Submodule resources for building from source
   resource "bearssl" do
     url "https://github.com/zfogg/ascii-chat/releases/download/build-tools/bearssl-3d9be2f.tar.gz"
     sha256 "6e63b4a78cfb370634bd027b6eeeca2664ddb71afbb03f00952897937c8c55a6"
@@ -53,11 +75,25 @@ class AsciiChat < Formula
   end
 
   def install
-    # For HEAD builds, initialize submodules; for releases, use resources
     if build.head?
+      # HEAD build: use git submodules
       system "git", "submodule", "update", "--init", "--recursive"
+      build_from_source
+    elsif File.exist?("bin/ascii-chat")
+      # Pre-built binary tarball: install directly
+      bin.install "bin/ascii-chat"
+      man1.install "share/man/man1/ascii-chat.1"
+      bash_completion.install "share/bash-completion/completions/ascii-chat"
+      fish_completion.install "share/fish/vendor_completions.d/ascii-chat.fish"
+      if File.exist?("share/zsh/site-functions/_ascii-chat")
+        zsh_completion.install "share/zsh/site-functions/_ascii-chat"
+      end
+      if File.exist?("etc/ascii-chat/config.toml.example")
+        (etc/"ascii-chat").install "etc/ascii-chat/config.toml.example"
+      end
     else
-      # Stage vendored dependencies for tarball releases (submodules not included)
+      # Source tarball (--build-from-source): build from source
+      # Stage vendored dependencies
       (buildpath/"deps/ascii-chat-deps/bearssl").install resource("bearssl")
       (buildpath/"deps/ascii-chat-deps/libsodium-bcrypt-pbkdf").install resource("libsodium-bcrypt-pbkdf")
       (buildpath/"deps/ascii-chat-deps/mdns").install resource("mdns")
@@ -65,15 +101,19 @@ class AsciiChat < Formula
       (buildpath/"deps/ascii-chat-deps/tomlc17").install resource("tomlc17")
       (buildpath/"deps/ascii-chat-deps/uthash").install resource("uthash")
 
-      # Create git repo for version detection (tarballs don't include .git)
+      # Create git repo for version detection
       system "git", "init"
       system "git", "config", "user.email", "brew@localhost"
       system "git", "config", "user.name", "Homebrew"
       system "git", "add", "-A"
       system "git", "commit", "-m", "v#{version}"
       system "git", "tag", "v#{version}"
-    end
 
+      build_from_source
+    end
+  end
+
+  def build_from_source
     # Use Homebrew LLVM for consistent ABI
     llvm = Formula["llvm"]
     ENV["CC"] = llvm.opt_bin/"clang"
@@ -82,13 +122,12 @@ class AsciiChat < Formula
     ENV["OBJCXX"] = llvm.opt_bin/"clang++"
 
     # Set up linker flags for Homebrew dependencies
-    # Include both unwind and c++ library paths to use Homebrew's libc++ instead of system
     ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib -L#{llvm.opt_lib}/unwind -L#{llvm.opt_lib}/c++ -lunwind -Wl,-rpath,#{llvm.opt_lib}/c++ -Wl,-rpath,#{llvm.opt_lib}/unwind"
     ENV["CPPFLAGS"] = "-I#{HOMEBREW_PREFIX}/include"
     ENV["PKG_CONFIG_PATH"] = "#{HOMEBREW_PREFIX}/lib/pkgconfig:#{HOMEBREW_PREFIX}/share/pkgconfig"
 
     # Download pre-built defer tool
-    defer_tool_dir = buildpath/".deps-cache/defer-tool"
+    defer_tool_dir = Pathname.pwd/".deps-cache/defer-tool"
     defer_tool_dir.mkpath
     defer_tool_path = defer_tool_dir/"ascii-instr-defer"
 
