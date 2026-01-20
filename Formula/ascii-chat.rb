@@ -6,24 +6,24 @@ class AsciiChat < Formula
 
   # Use pre-built binaries by default, source tarball for --build-from-source
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.1/ascii-chat-0.7.1-macOS-arm64.tar.gz"
-    sha256 "773fb130c853c4d00834c02592d0c244a08cdbec7d973aecfb32db0b46c1b855"
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.6/ascii-chat-0.7.6-macOS-arm64.tar.gz"
+    sha256 "0f2015e30fc8b1dcf35992d87e9d1d6c387c85083d55c8fecb22036820aa682b"
   elsif OS.mac? && Hardware::CPU.intel?
-    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.1/ascii-chat-0.7.1-macOS-amd64.tar.gz"
-    sha256 "64a870c1e0a625518bc45c2c31df444fe52ee2a3935bf38ad390bb49f9634c8b"
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.6/ascii-chat-0.7.6-macOS-amd64.tar.gz"
+    sha256 "f8f6e47a21cd3c46020868eaea3c810eef0baac79b3b92fd8d8cf3dfab504810"
   elsif OS.linux? && Hardware::CPU.arm?
-    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.1/ascii-chat-0.7.1-Linux-arm64.tar.gz"
-    sha256 "23726bdc54a9ebc03b8decbfb40c1adb8238c41293123c2675a426bdbee99a2f"
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.6/ascii-chat-0.7.6-Linux-arm64.tar.gz"
+    sha256 "b3b58ab2a39163a3f4f7c33a48d0a386657a9a9ffffceb4812fe9f5f4d7ae32b"
   else
-    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.1/ascii-chat-0.7.1-Linux-amd64.tar.gz"
-    sha256 "c810adc60208eadc39188a9cd2f572c210e4adf5aa27eead90d6d55cbc8fd30d"
+    url "https://github.com/zfogg/ascii-chat/releases/download/v0.7.6/ascii-chat-0.7.6-Linux-amd64.tar.gz"
+    sha256 "1e64c95e4c5200045823c97be7f3e95f8615cd662c9c91b3ecedfc72100ea2ea"
   end
-  version "0.7.1"
+  version "0.7.6"
 
   # Source tarball for --build-from-source
   resource "source" do
-    url "https://github.com/zfogg/ascii-chat/archive/refs/tags/v0.7.1.tar.gz"
-    sha256 "3ea427c7a3f0d42e7ea3059d19ff5941807bf04d983f9194ff78a55d0dcd2269"
+    url "https://github.com/zfogg/ascii-chat/archive/refs/tags/v0.7.6.tar.gz"
+    sha256 "823dab96cf94b53de0837ca3def8a540a1a2b5eaeb57bd0796ca8161818f0ea4"
   end
 
   # Build dependencies (only needed for --build-from-source or --HEAD)
