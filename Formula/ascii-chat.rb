@@ -33,14 +33,17 @@ class AsciiChat < Formula
   depends_on "pkgconf" => :build
   depends_on "abseil"
   depends_on "ffmpeg"
+  depends_on "gnupg"
   depends_on "libsodium"
   depends_on "llvm"
   depends_on "mimalloc"
   depends_on "miniupnpc"
   depends_on "openssl@3"
+  depends_on "openssh"
   depends_on "opus"
   depends_on "portaudio"
   depends_on "sqlite"
+  depends_on "yt-dlp"
   depends_on "zstd"
 
   # Submodule resources for building from source
