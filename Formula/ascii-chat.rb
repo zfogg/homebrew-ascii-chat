@@ -1,7 +1,6 @@
 class AsciiChat < Formula
   desc "Video chat in your terminal"
   homepage "https://ascii-chat.com"
-  version "0.16.30"
   license "MIT"
 
   if Hardware::CPU.arm?
